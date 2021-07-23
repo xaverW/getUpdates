@@ -1,3 +1,6 @@
+scriptBuildDate = "23.07.2021"
+
+
 # ==========================================================
 # ==========================================================
 
@@ -44,6 +47,7 @@ pathP2radio = ""
 
 searchMtplayer = True
 searchP2radio  = True
+searchGetUpdate  = True
 
 
 
@@ -54,10 +58,12 @@ import sys, urllib.request
 import platform
 from datetime import datetime
 from pathlib import Path
+
 home = str(Path.home())
 os = platform.system()
 urlMtplayer = "https://www.p2tools.de/mtplayer/download.html"
 urlP2Radio = "https://www.p2tools.de/p2radio/download.html"
+urlGetUpdate = "https://www.p2tools.de/download/"
 
 
 if pathMtplayer == "":
@@ -89,16 +95,15 @@ def dailyDate(url):
     search1='<a href="/daily/'.encode()
     search2='__'.encode()
     search3='.zip'.encode()
+
     try:
-        u=urllib.request.urlopen(url)
+        lines = urllib.request.urlopen(url).readlines()
     except:
         print("Fehler: Kann die Website nicht finden")
         sys.exit(0)
-
-    li = u.readlines()
-    u.close
+     
     ts = ""
-    for line in li:
+    for line in lines:
         pos1 = line.find(search1)
         pos2 = pos1 + len(search1)
         pos2 = line.find(search2, pos2) + len(search2)
@@ -107,9 +112,61 @@ def dailyDate(url):
         if pos1 != -1:
             ts = line[pos2:pos3]
             d =  ts.decode('utf-8')
-            date = datetime.strptime(d, '%Y.%m.%d')
+            foundDate = datetime.strptime(d, '%Y.%m.%d')
 
-    return date
+    return foundDate
+
+
+def getUrlDate(url):
+    #<p><a href="/download/getUpdate/getUpdates__2021.07.23.py">getUpdates__2021.07.23.py</a></p>
+    #https://www.p2tools.de/download/getUpdate/getUpdates__2021.07.23.py
+    search1='href="/download/getUpdate/'.encode()
+    search2='__'.encode()
+    search3='.py'.encode()
+    try:
+        lines=urllib.request.urlopen(url).readlines()
+    except:
+        print("Fehler: Kann die Website nicht finden")
+        sys.exit(0)
+
+    ts = ""
+    for line in lines:
+        pos1 = line.find(search1)
+        pos2 = pos1 + len(search1)
+        pos2 = line.find(search2, pos2) + len(search2)
+        pos3 = line.find(search3, pos2)
+        
+        if pos1 != -1:
+            ts = line[pos2:pos3]
+            d =  ts.decode('utf-8')
+            foundDate = datetime.strptime(d, '%Y.%m.%d')
+
+    return foundDate
+
+
+def getUrlDate_(url):
+    #scriptBuildDate = "23.07.2021"
+    search1='scriptBuildDate = "'.encode()
+    search2='"'.encode()
+    try:
+        lines=urllib.request.urlopen(url).readlines()
+    except:
+        print("Fehler: Kann die Website nicht finden")
+        sys.exit(0)
+
+    ts = ""
+    for line in lines:
+        pos1 = line.find(search1)
+        pos2 = pos1 + len(search1)
+        pos3 = line.find(search2, pos2)
+        
+        if pos1 != -1:
+            ts = line[pos2:pos3]
+            d =  ts.decode('utf-8')
+            foundDate = datetime.strptime(d, '%d.%m.%Y')
+            break
+
+    return foundDate
 
 
 def getXmlBuildDate(file, tag):
@@ -129,9 +186,9 @@ def getXmlBuildDate(file, tag):
             sys.exit(0)
 
         buildDate = bDate.text
-        date = datetime.strptime(buildDate, '%d.%m.%Y')
+        foundDate = datetime.strptime(buildDate, '%d.%m.%Y')
 
-    return date
+    return foundDate
 
 
 if searchMtplayer:
@@ -168,11 +225,31 @@ if searchP2radio:
         print("Es gibt   ===> KEIN <===   aktuelleres daily")
         print("BuildDate Programm: ", datetime.strftime(dXml, '%d.%m.%Y'))
         print("BuildDate daily:    ", datetime.strftime(dD, '%d.%m.%Y'))
+    print()
+    print()
+
+
+if searchGetUpdate:
+    print()
+    print("-----------------------")
+    print("======  GetUpdate  ======")
+    print("-----------------------")
+    dD = getUrlDate(urlGetUpdate)
+    date = datetime.strptime(scriptBuildDate, '%d.%m.%Y')
+    if date < dD:
+        print("Es gibt   ===> EIN <===   aktuelleres GetUrl")
+        print("BuildDate Script: ", scriptBuildDate)
+        print("BuildDate Update: ", datetime.strftime(dD, '%d.%m.%Y'))
+    else:
+        print("Es gibt   ===> KEIN <===   aktuelleres GetUrl")
+        print("BuildDate Script: ", scriptBuildDate)
+        print("BuildDate Update: ", datetime.strftime(dD, '%d.%m.%Y'))
 
 
 print()
 print()
 print("-----------------------------------------------------")
-print("download dailys: ", "https://www.p2tools.de/daily/")
+print("download dailys:     ", "https://www.p2tools.de/daily/")
+print("download GetUpdate:  ", "https://www.p2tools.de/download/")
 print("-----------------------------------------------------")
 
