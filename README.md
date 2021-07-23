@@ -3,6 +3,8 @@
 # GetUpdates
 Das Script ist dazu gedacht, einfach zu prüfen, obs ein Update für eins meiner Programme gibt. Das Script muss nur gestartet werden, es sucht nach den Config-Ordnern der Programme. Bei gefundenen Config-Ordnern wird dann die Programmversion ermittelt und mit den aktuellen Versionen verglichen. Gibt es eine aktuellere Version, wird das dann angezeigt. Das Script verändert selbst nichts, es wird nur die Information angezeigt.
 <br />
+Werden nicht die Standard-Config-Ordner verwendet, kann das im Script einfach angepasst werden. Dazu sind im Header Erklärungen enthalten.
+<br />
 
 ## Systemvoraussetzungen
 Unterstützt wird Windows und Linux.
