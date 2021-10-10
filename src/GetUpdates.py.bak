@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #coding=utf-8
 
-scriptBuildDate = "20.07.2021"
+scriptBuildDate = "29.07.2021"
 
 
 # ==========================================================
@@ -86,7 +86,8 @@ def getDate(lines, searchUrl, searchSuffix):
     #<p><a href="/download/p2radio/info/P2Radio__2021.07.20_1.txt">P2Radio__2021.07.20_1.txt</a></p>
     search1 = searchUrl.encode()
     search2 = '__'.encode()
-    search3 = searchSuffix.encode()
+    #search3 = searchSuffix.encode()
+    search3 = '.'.encode()
     search4 = '_'.encode()
 
     ts = ""
@@ -95,7 +96,8 @@ def getDate(lines, searchUrl, searchSuffix):
         pos1 = line.find(search1)
         pos2 = pos1 + len(search1)
         pos2 = line.rfind(search2, pos2) + len(search2)
-        pos3 = line.find(search3, pos2)
+        #pos3 = line.find(search3, pos2)
+        pos3 = line.rfind(search3)
         
         if pos1 != -1:
             ts = line[pos2:pos3]

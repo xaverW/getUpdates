@@ -70,6 +70,7 @@ urlFindUpdate = "https://www.p2tools.de/download/"
 #urlFindUpdate = "http://p2.localhost:8080/download/"
 
 
+
 def getUrl(url):
     try:
         lines = urllib.request.urlopen(url).readlines()
@@ -78,6 +79,7 @@ def getUrl(url):
         sys.exit(0)
 
     return lines
+
 
 
 def getDate(lines, searchUrl, searchSuffix):
@@ -112,6 +114,7 @@ def getDate(lines, searchUrl, searchSuffix):
     return foundDate
 
 
+
 def getXmlBuildDate(file, tag, dateTag):
     xmlFile = Path(file)
     if not xmlFile.is_file():
@@ -126,12 +129,14 @@ def getXmlBuildDate(file, tag, dateTag):
         if bDate is None:
             print("Fehler: Config-File: " + file)
             print("Fehler: BuildDate konnte im Config-File nicht gefunden werden: " + dateTag)
+            print()
             buildDate = "01.01.1970"
         else:
             buildDate = bDate.text
  
     foundDate = datetime.strptime(buildDate, '%d.%m.%Y')
     return foundDate
+
 
 
 def searchData(progName, progPath, configPath, configTag):
@@ -153,41 +158,21 @@ def searchData(progName, progPath, configPath, configTag):
     #act
     dateConfig = getXmlBuildDate(configPath, configTag, 'system-prog-build-date')
     dD = getDate(allLines, 'href="/download/' + progPath + '/act/' + progName, ".zip")
-    if dateConfig < dD:
-        print("  Programm  ==>  AKTUELLERE VERSION vorhanden")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate act:      ", datetime.strftime(dD, '%d.%m.%Y'))
-    else:
-        print("  Es gibt keine aktuellere VERSION")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate act:      ", datetime.strftime(dD, '%d.%m.%Y'))
+    printMsg(dateConfig, dD, "Programm  ==>  AKTUELLERE VERSION vorhanden", "Es gibt keine aktuellere VERSION", "BuildDate act:      ")
     print()
 
     #beta
     dD = getDate(allLines, 'href="/download/' + progPath + '/beta/' + progName, ".zip")
-    if dateConfig < dD:
-        print("  beta  ==>  AKTUELLERES BETA vorhanden")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate beta:     ", datetime.strftime(dD, '%d.%m.%Y'))
-    else:
-        print("  Es gibt keine aktuellere BETA")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate beta:     ", datetime.strftime(dD, '%d.%m.%Y'))
+    printMsg(dateConfig, dD, "beta  ==>  AKTUELLERES BETA vorhanden", "Es gibt keine aktuellere BETA", "BuildDate beta:     ")
     print()
 
     #daily
     dD = getDate(allLines, 'href="/download/' + progPath + '/daily/' + progName, ".zip")
-    if dateConfig < dD:
-        print("  daily  ==>  AKTUELLERES DAILY vorhanden")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate daily:    ", datetime.strftime(dD, '%d.%m.%Y'))
-    else:
-        print("  Es gibt kein aktuelleres DAILY")
-        print("    BuildDate Programm: ", datetime.strftime(dateConfig, '%d.%m.%Y'))
-        print("    BuildDate daily:    ", datetime.strftime(dD, '%d.%m.%Y'))
+    printMsg(dateConfig, dD, "daily  ==>  AKTUELLERES DAILY vorhanden", "Es gibt kein aktuelleres DAILY", "BuildDate daily:    ")
     print("-----------------------------------")
     print()
     print()
+    
 
 
 def searchGetUpdateData():
@@ -198,24 +183,43 @@ def searchGetUpdateData():
     print("-----------------------------------")
 
     date = datetime.strptime(scriptBuildDate, '%d.%m.%Y')
-    dateWeb = getDate(allLines, '<a href="/download/getUpdate/GetUpdates', ".py")
-    if date < dateWeb:
-        print("  GetUpdate  ==>  AKTUELLERES GETUPDATE vorhanden")
-        print("    BuildDate Programm: ", datetime.strftime(date, '%d.%m.%Y'))
-        print("    BuildDate act:      ", datetime.strftime(dateWeb, '%d.%m.%Y'))
-    else:
-        print("  Es gibt kein aktuelleres GETUPDATE")
-        print("    BuildDate Programm: ", datetime.strftime(date, '%d.%m.%Y'))
-        print("    BuildDate act:      ", datetime.strftime(dateWeb, '%d.%m.%Y'))
-    print()
+    dateWeb = getDate(allLines, '<a href="/download/getupdate/GetUpdates', ".py")
+    printMsg(date, dateWeb, "GetUpdate  ==>  AKTUELLERES GETUPDATE vorhanden", "Es gibt kein aktuelleres GETUPDATE", "BuildDate act:      ")
     print("-----------------------------------")
     print()
     print()
+    
+
+
+def printMsg(dateConfig, dD, msg1, msg2, msg3):
+    dConf = datetime.strftime(dateConfig, '%d.%m.%Y')
+    dProg = datetime.strftime(dD, '%d.%m.%Y')
+
+    if dateConfig == datetime(1970, 1, 1):
+        dConf = ""
+    if dD == datetime(1970, 1, 1):
+        dProg = ""
+        
+    if dateConfig < dD:
+        print(" ", msg1)
+        print("    BuildDate Programm: ", dConf)
+        print("   ", msg3, dProg)
+    else:
+        print(" ", msg2)
+        print("    BuildDate Programm: ", dConf)
+        print("   ", msg3, dProg)
+    print()
+
+
 
 
 #=========================================
-#los gehts
 #=========================================
+    #los gehts
+#=========================================
+#=========================================
+
+#Pfade zum config festlegen
 if pathMtplayer == "":
     if os=="Windows":
         configMtplayer = home + "\\p2Mtplayer\\mtplayer.xml"
@@ -234,18 +238,20 @@ else:
     configP2radio = pathP2radio
     
 
+#Website laden
 allLines = getUrl(urlFindUpdate)
         
-#== MTPlayer Infos suchen
+
+#MTPlayer Infos suchen
 if searchMtplayer:
     searchData("MTPlayer", "mtplayer", configMtplayer, 'system')
  
     
-#== P2Radio Infos suchen
+#P2Radio Infos suchen
 if searchP2Radio:
     searchData("P2Radio", "p2radio", configP2radio, 'ProgConfig')
 
-#== GetUpdate Infos suchen
+#GetUpdate Infos suchen
 if searchGetUpdate:
     searchGetUpdateData()
 
